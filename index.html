@@ -85,7 +85,7 @@
             }), currentDelay);
         });
 
-        setTimeout(() => document.title = shownQuote, currentDelay);
+        setTimeout(() => document.title = shownQuote.replaceAll('_', ''), currentDelay);
         repositionText();
     }
 
