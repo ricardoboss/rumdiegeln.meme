@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>rumdiegeln.meme</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Imperial+Script&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            width: 100dvw;
+            height: 100dvh;
+        }
+
+        text {
+            font-family: "Imperial Script", cursive;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 3rem;
+        }
+
+        text tspan {
+            fill: transparent;
+            stroke: none;
+            transition-duration: 0.5s;
+            transition-property: fill;
+        }
+    </style>
+</head>
+<body>
+<svg>
+    <text id="t" x="0" y="50%"></text>
+</svg>
+
+<script>
+    const quotes = [
+        'Im Büro _gibt es keine Fakten.',
+        'Der Ball liegt in der Spielfeldhälfte der anderen.',
+        'German Speed',
+        'The chimneys must smoke.',
+        'What is your meaning?',
+        'Kennen Sie schon Deutschlands größtes Lotsenportal?',
+        'Das ist kein Hexenwerk.',
+        'Das ist keine Rocket Science.',
+        'Kompliziert bauen kann jeder.',
+        'Die teuerste Schraube ist die,_ die man nicht hat.',
+        'Das ist ja wie im Bauhaus hier!',
+        'Ich hab früher auch mal kodiert.',
+        'So einfach wie möglich,_ aber nicht einfacher.',
+        'Erfahrung ist nicht das, was du erleben wolltest,_ sondern das, was du bekommst, wenn es anders läuft als geplant.',
+        'Wie isst man einen Elefanten?_ Stück für Stück.',
+        'Leben ist das, was passiert, während du andere Pläne machst',
+    ];
+
+    const textElement = document.getElementById('t');
+
+    async function play() {
+        const shownQuote = quotes[Math.floor(quotes.length * Math.random())];
+        let currentDelay = 500; // delay initial reveal
+        [...shownQuote].forEach(ch => {
+            const span = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+
+            if (ch === '_') {
+                currentDelay += 1000; // additional pause while animating
+                return;
+            }
+
+            span.textContent = ch;
+
+            textElement.appendChild(span);
+
+            currentDelay += 50; // 50ms delay per char
+            setTimeout(() => requestAnimationFrame(() => {
+                span.style.fill = `#000`;
+            }), currentDelay);
+        });
+
+        setTimeout(() => document.title = shownQuote, currentDelay);
+        repositionText();
+    }
+
+    function repositionText() {
+        console.log("repositioning")
+        requestAnimationFrame(() => {
+            const textLength = textElement.getComputedTextLength();
+            textElement.setAttribute('x', `${window.innerWidth / 2 - textLength / 2}px`);
+        });
+    }
+
+    document.fonts ? document.fonts.ready.then(play) : setTimeout(play, 200);
+    window.addEventListener('resize', repositionText);
+</script>
+</body>
+</html>
