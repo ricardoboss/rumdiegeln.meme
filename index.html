@@ -42,48 +42,43 @@
 </svg>
 
 <script>
-    const quotes = [
-        'Im Büro _gibt es keine Fakten.',
-        'Der Ball liegt in der Spielfeldhälfte der anderen.',
-        'German Speed',
-        'The chimneys must smoke.',
-        'What is your meaning?',
-        'Kennen Sie schon Deutschlands größtes Lotsenportal?',
-        'Das ist kein Hexenwerk.',
-        'Das ist keine Rocket Science.',
-        'Kompliziert bauen kann jeder.',
-        'Die teuerste Schraube ist die,_ die man nicht hat.',
-        'Das ist ja wie im Bauhaus hier!',
-        'Ich hab früher auch mal kodiert.',
-        'So einfach wie möglich,_ aber nicht einfacher.',
-        'Erfahrung ist nicht das, was du erleben wolltest, sondern das, was du bekommst, wenn es anders läuft als geplant.',
-        'Wie isst man einen Elefanten?_ Stück für Stück.',
-        'Leben ist das, was passiert, während du andere Pläne machst',
-        'Du verstehst das nicht,_ du bist nur Informatiker',
-        'Shit in_, Shit out',
-        'Manche sind Teil der Lösung, manche Teil des Problems_, und manche sind Teil der Landschaft',
-        'Manchmal muss man den Ball einfach nur dreckig über die Linie kriegen.',
-        'Du siehst das zu technisch.',
-        'Mann muss sich von einer KANN-Situation in eine MUSS-Situation bewegen!',
-        'Sylter Zaun',
-        'Fledermausgaube',
-    ];
-
     const baseElement = document.getElementById('base');
+    let quotes = [];
+
+    async function loadQuotes() {
+        try {
+            const response = await fetch('quotes.json');
+            const quotesContent = await response.json();
+
+            if (!Array.isArray(quotesContent) || quotesContent.length === 0)
+                quotes = ['Invalid quotes response'];
+            else
+                quotes = quotesContent;
+        } catch {
+            quotes = ['Error fetching quotes'];
+        }
+    }
 
     async function play() {
+        await loadQuotes();
+
+        const shownQuote = quotes[Math.floor(quotes.length * Math.random())];
+
+        await writeQuote(shownQuote);
+    }
+
+    async function writeQuote(quote) {
         const initialDelay = 500; // delay initial reveal
         const delayPerChar = 50; // 50ms delay per char
         const delayPerUnderscore = 1000; // additional pause while animating
         const maxCharsPerLine = 30;
 
-        const shownQuote = quotes[Math.floor(quotes.length * Math.random())];
         let currentDelay = initialDelay;
 
         const lines = [];
         let charIdx = 0;
         let lineIdx = 0;
-        for (const ch of shownQuote) {
+        for (const ch of quote) {
             charIdx++;
 
             if (charIdx > maxCharsPerLine && ch === ' ') {
@@ -114,7 +109,7 @@
             currentLineIdx++;
         });
 
-        setTimeout(() => document.title = shownQuote.replaceAll('_', ''), currentDelay);
+        setTimeout(() => document.title = quote.replaceAll('_', ''), currentDelay);
         setTimeout(repositionText, initialDelay - 1); // sometimes, the text is not properly positioned
     }
 
