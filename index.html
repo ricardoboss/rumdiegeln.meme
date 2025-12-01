@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
     <title>rumdiegeln.meme</title>
@@ -38,8 +38,7 @@
     </style>
 </head>
 <body>
-<svg>
-    <text id="t" x="0" y="50%"></text>
+<svg id="base">
 </svg>
 
 <script>
@@ -57,12 +56,12 @@
         'Das ist ja wie im Bauhaus hier!',
         'Ich hab früher auch mal kodiert.',
         'So einfach wie möglich,_ aber nicht einfacher.',
-        'Erfahrung ist nicht das, was du erleben wolltest,_ sondern das, was du bekommst, wenn es anders läuft als geplant.',
+        'Erfahrung ist nicht das, was du erleben wolltest, sondern das, was du bekommst, wenn es anders läuft als geplant.',
         'Wie isst man einen Elefanten?_ Stück für Stück.',
         'Leben ist das, was passiert, während du andere Pläne machst',
         'Du verstehst das nicht,_ du bist nur Informatiker',
         'Shit in_, Shit out',
-        'Manche sind Teil der Lösung, manche des Problems,_ und manche sind Teil der Landschaft',
+        'Manche sind Teil der Lösung, manche Teil des Problems_, und manche sind Teil der Landschaft',
         'den Ball dreckig über die Linie kriegen.',
         'Du siehst das zu technisch.',
         'Mann muss sich von einer KANN-Situation in eine MUSS-Situation bewegen!',
@@ -70,38 +69,90 @@
         'Fledermausgaube',
     ];
 
-    const textElement = document.getElementById('t');
+    const baseElement = document.getElementById('base');
 
     async function play() {
-        const shownQuote = quotes[Math.floor(quotes.length * Math.random())];
-        let currentDelay = 500; // delay initial reveal
-        [...shownQuote].forEach(ch => {
-            const span = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+        const initialDelay = 500; // delay initial reveal
+        const delayPerChar = 50; // 50ms delay per char
+        const delayPerUnderscore = 1000; // additional pause while animating
+        const maxCharsPerLine = 30;
 
-            if (ch === '_') {
-                currentDelay += 1000; // additional pause while animating
-                return;
+        const shownQuote = quotes[Math.floor(quotes.length * Math.random())];
+        let currentDelay = initialDelay;
+
+        const lines = [];
+        let charIdx = 0;
+        let lineIdx = 0;
+        for (const ch of shownQuote) {
+            charIdx++;
+
+            if (charIdx > maxCharsPerLine && ch === ' ') {
+                lineIdx++;
+                charIdx = 0;
+                continue;
             }
 
-            span.textContent = ch;
+            lines[lineIdx] ??= '';
+            lines[lineIdx] = lines[lineIdx] + ch;
+        }
 
-            textElement.appendChild(span);
+        let currentLineIdx = 0;
+        [...lines].forEach(l => {
+            const text = addLine(currentLineIdx, lines.length);
 
-            currentDelay += 50; // 50ms delay per char
-            setTimeout(() => requestAnimationFrame(() => {
-                span.style.fill = `#000`;
-            }), currentDelay);
+            [...l].forEach(ch => {
+                if (ch === '_') {
+                    currentDelay += delayPerUnderscore;
+                    return;
+                }
+
+
+                currentDelay += delayPerChar;
+                addChar(text, ch, currentDelay);
+            });
+
+            currentLineIdx++;
         });
 
         setTimeout(() => document.title = shownQuote.replaceAll('_', ''), currentDelay);
-        repositionText();
+        setTimeout(repositionText, initialDelay - 1); // sometimes, the text is not properly positioned
+    }
+
+    function addLine(line, maxLines) {
+        // <text id="t" x="0" y="50%"></text>
+        const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+        // text should be centered, so middle line must be at 50% (or for even line count, 45/55%)
+        // lines are 0-indexed
+        const yOffset = 0.5 - (maxLines - 1) * 0.05 + line * 0.1;
+
+        textElement.setAttribute('x', '0');
+        textElement.setAttribute('y', `${yOffset * 100}%`);
+
+        baseElement.appendChild(textElement);
+
+        return textElement;
+    }
+
+    function addChar(parent, ch, delay) {
+        const spanElement = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+
+        spanElement.textContent = ch;
+
+        parent.appendChild(spanElement);
+
+        setTimeout(() => requestAnimationFrame(() => {
+            spanElement.style.fill = `#000`;
+        }), delay);
     }
 
     function repositionText() {
-        console.log("repositioning")
         requestAnimationFrame(() => {
-            const textLength = textElement.getComputedTextLength();
-            textElement.setAttribute('x', `${window.innerWidth / 2 - textLength / 2}px`);
+            for (const textElement of document.getElementsByTagName('text')) {
+                const textLength = textElement.getComputedTextLength();
+
+                textElement.setAttribute('x', `${baseElement.scrollWidth / 2 - textLength / 2}px`);
+            }
         });
     }
 
