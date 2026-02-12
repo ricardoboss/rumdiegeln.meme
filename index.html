@@ -62,9 +62,22 @@
     async function play() {
         await loadQuotes();
 
-        const shownQuote = quotes[Math.floor(quotes.length * Math.random())];
+        shuffleQuotes();
+
+        const shownQuote = quotes[0];
 
         await writeQuote(shownQuote);
+    }
+
+    function shuffleQuotes() {
+        var i = quotes.length, j, tempElement;
+
+        while(--i > 0) {
+            j = Math.floor(Math.random() * (i + 1));
+            temp = quotes[j];
+            quotes[j] = quotes[i];
+            quotes[i] = tempElement;
+        }
     }
 
     async function writeQuote(quote) {
